@@ -186,7 +186,8 @@ jobs:
           fetch-depth: 0
 
       - name: Release version context
-        run: echo "🚢 MCP publish for version: $VERSION"
+        run: |
+          echo "🚢 MCP publish for version: $VERSION"
 
       - name: Missing secret — skip MCP publish
         if: env.MCP_DNS_PRIVATE_KEY == ''
