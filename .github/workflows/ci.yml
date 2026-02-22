@@ -47,4 +47,10 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - run: npx pkg-pr-new publish
+      - name: Publish preview package for pull requests
+        if: github.event_name == 'pull_request'
+        run: npx pkg-pr-new publish --comment=update
+
+      - name: Publish preview package for main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npx pkg-pr-new publish --comment=off
