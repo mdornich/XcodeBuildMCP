@@ -94,8 +94,9 @@ else
 
     echo "📥 Downloading latest AXe release from GitHub..."
 
-    # Prefer Homebrew-specific archive (unsigned for relocation compatibility),
-    # and fall back to legacy signed archive for older AXe releases.
+    # On macOS, prefer the Homebrew-specific archive (unsigned for relocation
+    # compatibility) and ad-hoc sign it later. On non-macOS (e.g. CI on Linux),
+    # codesign is unavailable so use the legacy pre-signed archive directly.
     AXE_RELEASE_BASE_URL="https://github.com/cameroncooke/AXe/releases/download/v${PINNED_AXE_VERSION}"
     AXE_HOMEBREW_URL="${AXE_RELEASE_BASE_URL}/AXe-macOS-homebrew-v${PINNED_AXE_VERSION}.tar.gz"
     AXE_LEGACY_URL="${AXE_RELEASE_BASE_URL}/AXe-macOS-v${PINNED_AXE_VERSION}.tar.gz"
@@ -105,8 +106,11 @@ else
     cd "$AXE_TEMP_DIR"
 
     # Download and extract the release
-    echo "📥 Downloading AXe Homebrew archive ($AXE_HOMEBREW_URL)..."
-    if curl -fL -o "axe-release.tar.gz" "$AXE_HOMEBREW_URL"; then
+    if [ "$(uname -s)" != "Darwin" ]; then
+        echo "📥 Non-macOS detected; downloading pre-signed legacy archive ($AXE_LEGACY_URL)..."
+        curl -fL -o "axe-release.tar.gz" "$AXE_LEGACY_URL"
+        AXE_ARCHIVE_FLAVOR="legacy-signed"
+    elif curl -fL -o "axe-release.tar.gz" "$AXE_HOMEBREW_URL"; then
         AXE_ARCHIVE_FLAVOR="homebrew-unsigned"
         echo "✅ Downloaded AXe Homebrew archive"
     else
